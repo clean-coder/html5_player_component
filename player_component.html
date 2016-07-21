@@ -1,0 +1,112 @@
+<template id="mytemplate">
+    <style>
+        <style> img {
+            border-radius: 10%;
+            margin: 0px 0px 20px 0px;
+        }
+        
+        button {
+            background-color: black;
+            color: white;
+            border-radius: 20%;
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: red;
+        }
+        
+        #trackStatusesDiv {
+            margin-top: -80px;
+            border: 3px solid;
+            height: 20px;
+            padding: 20px;
+            width: 200px;
+            color: white;
+        }
+    </style>
+    <figure id="figaudio1">
+        <img id='shadowPlayerImgage' src='' width=250px;>
+        <figcaption id="figcptionaudio1">
+            <audio id="aid" crossOrigin="anonymous">
+                <source id='shadowPlayerSound' src="" type="audio/mp3" />
+            </audio>
+            <button onclick="playAudio();" style="cursor: pointer;">Play</button>
+            <button onclick="pausAudio();" style="cursor: pointer;">Pause</button>
+            <button onclick="stopAudo();" style="cursor: pointer;">Reset</button>
+        </figcaption>
+    </figure>
+</template>
+
+<script>
+
+var aid; // reference to audio tag
+var shadowDom; // reference to shoadowDom;
+
+// --- coponent init section
+loadTemplate();
+initComponent(initPlayer);
+
+function initPlayer() {
+  // copy player image from dom to shadow dom
+  var image = document.getElementById('playerImgage');
+  var shadowImage = shadowDom.getElementById('shadowPlayerImgage')
+  shadowImage.src = image.innerHTML;
+
+  // copy player sound source from dom to shadow dom
+  var sound = document.getElementById('playerSound');
+  var shadowSound = shadowDom.getElementById('shadowPlayerSound')
+  shadowSound.src = sound.innerHTML;
+}
+
+function loadTemplate() {
+  var link = document.querySelector('link[rel="import"]');
+  var templates = link.import.querySelectorAll('template');
+  for (var i = 0; i < templates.length; i++) {
+    document.querySelector('body').appendChild(templates[i]);
+  }
+}
+
+function initComponent(callback) {
+  // Instanciate the template
+  var template = document.querySelector('#mytemplate');
+  // Populate the src at runtime.
+  var clone = document.importNode(template.content, true);
+
+  // Custom element code for creating an instance of 
+  // the custom element
+  var widgetProto = Object.create(HTMLElement.prototype);
+
+  // called when the custom element is created
+  widgetProto.createdCallback = function () {
+    // create and fill the shadow root with a cloned
+    // template
+    var root = this.createShadowRoot();
+    shadowDom = root; // SAVE ROOT TO SHADOW DOM !!!!
+    root.appendChild(clone);
+    callback(); // copy content from dom to shadow dom
+  };
+
+  // Register the new custom element, and set the
+  // prototype for creating it
+  var Widget = document.registerElement("my-player", {
+    prototype: widgetProto
+  });
+}
+
+// --- starting business logic    
+function playAudio() {
+  aid = shadowDom.getElementById("aid");
+  aid.play();
+}
+function pausAudio() {
+  aid = shadowDom.getElementById("aid");
+  aid.pause();
+}
+function stopAudo() {
+  aid = shadowDom.getElementById("aid");
+  aid.currentTime = 0;
+  aid.pause();
+}
+</script>
